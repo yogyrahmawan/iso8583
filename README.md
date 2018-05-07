@@ -15,6 +15,9 @@ Encode types:
 * rbcd - BCD encoding with "right-aligned" value with odd length (for ex. "643" as [6 67] == "0643"), only for Numeric, Llnumeric and Lllnumeric fields
 * ascii - ASCII encoding
 
+Added Bitmap encoding:
+* Support plain ascii or hexa
+
 ### Example
 
 ```go
@@ -46,6 +49,10 @@ func main() {
 	}
 	msg := iso8583.NewMessage("0800", data)
 	msg.MtiEncode = iso8583.BCD
+	
+	// set to bitmap hex or leave empty to use default 
+	msg.BitmapEncode = ios8583.HexEncoding
+	
 	b, err := msg.Bytes()
 	if err != nil {
 		fmt.Println(err.Error())
