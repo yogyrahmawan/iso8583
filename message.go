@@ -1,6 +1,7 @@
 package iso8583
 
 import (
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"reflect"
@@ -12,6 +13,8 @@ const (
 	TAG_FIELD  string = "field"
 	TAG_ENCODE string = "encode"
 	TAG_LENGTH string = "length"
+
+	TagPlain string = "plain"
 )
 
 type fieldInfo struct {
@@ -28,11 +31,17 @@ type Message struct {
 	MtiEncode    int
 	SecondBitmap bool
 	Data         interface{}
+	BitmapEncode int
 }
 
 // NewMessage creates new Message structure
 func NewMessage(mti string, data interface{}) *Message {
-	return &Message{mti, ASCII, false, data}
+	return &Message{
+		Mti:          mti,
+		MtiEncode:    ASCII,
+		SecondBitmap: false,
+		Data:         data,
+	}
 }
 
 // Bytes marshall Message to bytes
@@ -93,6 +102,11 @@ func (m *Message) Bytes() (ret []byte, err error) {
 			}
 		}
 	}
+
+	if m.BitmapEncode == HexEncoding {
+		bitmap = []byte(strings.ToUpper(hex.EncodeToString(bitmap[:])))
+	}
+
 	ret = append(ret, bitmap...)
 	ret = append(ret, data...)
 
@@ -216,8 +230,20 @@ func (m *Message) Load(raw []byte) (err error) {
 		m.SecondBitmap = true
 		byteNum = 16
 	}
-	bitByte := raw[start : start+byteNum]
-	start += byteNum
+
+	// handle hexa
+	var bitByte []byte
+	if m.BitmapEncode == HexEncoding {
+		bitByte, err = hex.DecodeString(string(raw[start : start+byteNum*2]))
+		if err != nil {
+			return errors.New("cannot decode , not ascii format")
+		}
+
+		start += byteNum * 2
+	} else {
+		bitByte = raw[start : start+byteNum]
+		start += byteNum
+	}
 
 	for byteIndex := 0; byteIndex < byteNum; byteIndex++ {
 		for bitIndex := 0; bitIndex < 8; bitIndex++ {

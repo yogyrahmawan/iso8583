@@ -14,6 +14,8 @@ const (
 	BCD
 	// rBCD is "right-aligned" BCD with odd length (for ex. "643" as [6 67] == "0643"), only for Numeric, Llnumeric and Lllnumeric fields
 	rBCD
+	// HexEncoding is hexadecimal encoding
+	HexEncoding
 )
 
 const (
