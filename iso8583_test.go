@@ -2068,6 +2068,10 @@ func TestBitmapIsHex(t *testing.T) {
 		F10 *Numeric `field:"10" length:"10" encode:"ascii"`
 	}
 
+	type Test3 struct {
+		F10 *Lllvar `field:"10" length:"999" encode:"ascii"`
+	}
+
 	data := &Test1{
 		F10: NewNumeric("0000000010"),
 	}
@@ -2134,6 +2138,38 @@ func TestBitmapIsHex(t *testing.T) {
 	resultField2 := iso3.Data.(*Test2)
 	assert.Equal(t, resultField2.F2.Value, "0012")
 	assert.Equal(t, resultField2.F10.Value, "0000000010")
+
+	// lllvar
+	data4 := &Test3{
+		F10: NewLllvar([]byte("halohalo bandung")),
+	}
+
+	iso4 := Message{
+		Mti:          "0200",
+		MtiEncode:    ASCII,
+		SecondBitmap: false,
+		Data:         data4,
+		BitmapEncode: HexEncoding,
+	}
+
+	emptyIso4 := Message{
+		Mti:          "0200",
+		MtiEncode:    ASCII,
+		SecondBitmap: false,
+		Data: &Test3{
+			F10: NewLllvar([]byte("")),
+		},
+		BitmapEncode: HexEncoding,
+	}
+
+	isoBytes, err = iso4.Bytes()
+	assert.Empty(t, err)
+
+	err = emptyIso4.Load(isoBytes)
+	assert.Empty(t, err)
+
+	resultField3 := emptyIso4.Data.(*Test3)
+	assert.Equal(t, string(resultField3.F10.Value[:]), "halohalo bandung")
 }
 
 // newDataIso creates DataIso
