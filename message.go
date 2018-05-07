@@ -234,6 +234,16 @@ func (m *Message) Load(raw []byte) (err error) {
 	// handle hexa
 	var bitByte []byte
 	if m.BitmapEncode == HexEncoding {
+		tempByte, err := hex.DecodeString(string(raw[start : start+byteNum*2]))
+		if err != nil {
+			return errors.New("cannot decode , not ascii format")
+		}
+
+		if tempByte[0]&0x80 == 0x80 {
+			m.SecondBitmap = true
+			byteNum = 16
+		}
+
 		bitByte, err = hex.DecodeString(string(raw[start : start+byteNum*2]))
 		if err != nil {
 			return errors.New("cannot decode , not ascii format")
