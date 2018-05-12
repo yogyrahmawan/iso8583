@@ -51,7 +51,7 @@ func main() {
 	msg.MtiEncode = iso8583.BCD
 	
 	// set to bitmap hex or leave empty to use default 
-	msg.BitmapEncode = ios8583.HexEncoding
+	msg.BitmapEncode = iso8583.HexEncoding
 	
 	b, err := msg.Bytes()
 	if err != nil {
